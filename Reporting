@@ -1,10 +1,1481 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>Mon site</title>
-  </head>
-  <body>
-    <h1>HELLO</h1>
-    <p>Mon premier site</p>
-  </body>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aterno – Suivi Campagnes Meta</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f4f6f9;
+    color: #1a1a2e;
+    padding: 24px 32px;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+
+  .header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+    border-radius: 16px;
+    padding: 28px 32px;
+    margin-bottom: 24px;
+    color: white;
+  }
+  .header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+  .header p { font-size: 13px; opacity: 0.65; margin-top: 4px; }
+
+  .alert-box {
+    background: #fef3c7;
+    border: 1px solid #fbbf24;
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-bottom: 24px;
+    font-size: 13.5px;
+    color: #92400e;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .alert-box .icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+
+  .legend {
+    background: white;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+  }
+  .legend h3 { font-size: 13px; font-weight: 700; color: #374151; margin-bottom: 10px; }
+  .legend-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #4b5563; }
+
+  .section { margin-bottom: 28px; }
+  .section-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #374151;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .table-wrap {
+    background: white;
+    border-radius: 12px;
+    overflow-x: auto;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+  }
+
+  .camp-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .camp-table thead tr { background: #1a1a2e; color: white; }
+  .camp-table thead th {
+    padding: 11px 16px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+  }
+  .camp-table tbody tr { border-bottom: 1px solid #f0f0f5; }
+  .camp-table tbody tr:hover { background: #f8faff; }
+  .camp-table td { padding: 12px 16px; vertical-align: middle; background: white; white-space: normal; font-size: 13px; }
+  .camp-table tbody tr:last-child td { border-bottom: none; }
+  .camp-table td small { display: block; font-size: 11px; color: #9ca3af; margin-top: 2px; }
+
+  .budget-row td { background: #f0f4ff !important; font-weight: 700; color: #1d4ed8; font-size: 13px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 9px; border-radius: 20px;
+    font-size: 11px; font-weight: 600; white-space: nowrap;
+  }
+  .b-live   { background: #dcfce7; color: #15803d; }
+  .b-enc    { background: #dbeafe; color: #1d4ed8; }
+  .b-wait   { background: #fef9c3; color: #854d0e; }
+  .b-done   { background: #f3f4f6; color: #6b7280; }
+  .b-cancel { background: #fce7f3; color: #9d174d; }
+  .b-soon   { background: #ede9fe; color: #6d28d9; }
+  .b-valid  { background: #dbeafe; color: #1d4ed8; }
+
+  .form-wait { background: #fef9c3; color: #854d0e; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; display: inline-block; white-space: nowrap; }
+  .form-no   { background: #f3f4f6; color: #9ca3af; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; display: inline-block; white-space: nowrap; }
+  .form-fin  { background: #e0e7ff; color: #3730a3; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; display: inline-block; white-space: nowrap; }
+  .form-lp   { background: #f0fdf4; color: #166534; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px; display: inline-block; white-space: nowrap; border: 1px solid #bbf7d0; }
+
+  .local-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .local-card {
+    background: white; border-radius: 10px; padding: 14px 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07); border-top: 3px solid #3b82f6;
+  }
+  .local-card h4 { font-size: 13px; font-weight: 700; color: #1e3a5f; margin-bottom: 10px; }
+  .local-row {
+    display: grid; grid-template-columns: 1fr auto auto; gap: 6px;
+    align-items: center; font-size: 12px; color: #6b7280;
+    margin-bottom: 5px; padding-bottom: 5px; border-bottom: 1px solid #f3f4f6;
+  }
+  .local-row:last-of-type { border-bottom: none; margin-bottom: 0; }
+  .local-row .lbl { color: #374151; font-weight: 500; }
+  .local-row .date { font-size: 10.5px; color: #9ca3af; }
+  .local-budget {
+    margin-top: 10px; padding-top: 8px; border-top: 2px solid #e5e7eb;
+    display: flex; justify-content: space-between;
+    font-size: 12px; font-weight: 700; color: #1d4ed8;
+  }
+
+  .steps-list { list-style: none; }
+  .steps-list li {
+    background: white; border-radius: 10px; padding: 12px 16px;
+    margin-bottom: 8px; font-size: 13.5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .steps-list li .step-icon { font-size: 16px; flex-shrink: 0; }
+
+  .footer { text-align: center; font-size: 11px; color: #9ca3af; margin-top: 20px; padding-top: 16px; border-top: 1px solid #e5e7eb; }
+
+  @media (max-width: 700px) { .local-grid { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+
+<div class="header" style="padding:36px 40px;">
+  <div style="font-size:10px;letter-spacing:3px;text-transform:uppercase;opacity:0.45;margin-bottom:10px;">Reporting publicitaire · Meta Ads</div>
+  <h1 style="font-size:28px;font-weight:900;letter-spacing:-1px;line-height:1.1;">ATERNO</h1>
+  <h2 style="font-size:15px;font-weight:500;opacity:0.7;margin-top:4px;letter-spacing:1px;text-transform:uppercase;">Reporting Campagnes Meta Ads</h2>
+  <div style="margin-top:14px;display:inline-block;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:5px 16px;font-size:12px;opacity:0.8;">
+    📅 Du 01/01/2026 au 30/03/2026 &nbsp;·&nbsp; Mis à jour le 30/03/2026
+  </div>
+</div>
+
+<!-- RECAP GLOBAL -->
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:24px;">
+  <div style="background:white;border-radius:14px;padding:24px 28px;box-shadow:0 2px 8px rgba(0,0,0,0.08);border-top:4px solid #1d4ed8;text-align:center;">
+    <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#6b7280;margin-bottom:8px;">💸 Total dépensé</div>
+    <div style="font-size:36px;font-weight:900;color:#1d4ed8;line-height:1;">73 784 €</div>
+    <div style="font-size:11px;color:#9ca3af;margin-top:6px;">Toutes campagnes confondues</div>
+  </div>
+  <div style="background:white;border-radius:14px;padding:24px 28px;box-shadow:0 2px 8px rgba(0,0,0,0.08);border-top:4px solid #22c55e;text-align:center;">
+    <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#6b7280;margin-bottom:8px;">🎯 Total leads</div>
+    <div style="font-size:36px;font-weight:900;color:#15803d;line-height:1;">5 722</div>
+    <div style="font-size:11px;color:#9ca3af;margin-top:6px;">Leads générés sur la période</div>
+  </div>
+  <div style="background:white;border-radius:14px;padding:24px 28px;box-shadow:0 2px 8px rgba(0,0,0,0.08);border-top:4px solid #f97316;text-align:center;">
+    <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#6b7280;margin-bottom:8px;">📊 CPL moyen</div>
+    <div style="font-size:36px;font-weight:900;color:#ea580c;line-height:1;">12,69 €</div>
+    <div style="font-size:11px;color:#9ca3af;margin-top:6px;">Coût par lead moyen global</div>
+  </div>
+</div>
+
+<!-- SÉPARATEUR CAMPAGNES EN COURS -->
+<div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;margin-top:8px;">
+  <div style="background:#22c55e;border-radius:8px;padding:6px 16px;display:flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(34,197,94,0.3);">
+    <div style="width:8px;height:8px;border-radius:50%;background:white;animation:pulse 1.5s infinite;"></div>
+    <span style="font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:white;">Campagnes actives</span>
+  </div>
+  <div style="flex:1;height:1px;background:linear-gradient(to right,#22c55e40,transparent);"></div>
+</div>
+<style>
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+</style>
+
+<div class="alert-box">
+  <span class="icon">⚠️</span>
+  <div><strong>Point bloquant :</strong> Les campagnes Solaire et Agences Locales (Lead) attendent encore la connexion IT des formulaires. Le Bilan Thermique est désormais en ligne ✅</div>
+</div>
+
+<div class="legend">
+  <h3>📋 Légende des formulaires</h3>
+  <div class="legend-grid">
+    <div class="legend-item"><span class="form-wait">⏳ Attente IT</span> Formulaire créé sur Meta, en attente de connexion IT</div>
+    <div class="legend-item"><span class="form-lp">🔗 LP</span> Redirige vers une landing page (pas de formulaire Meta)</div>
+    <div class="legend-item"><span class="form-fin">📁 Finalisé</span> Formulaire d'une campagne terminée</div>
+    <div class="legend-item"><span class="form-no">— Sans formulaire</span> Campagne vers site web ou DM</div>
+  </div>
+</div>
+
+<!-- BILAN THERMIQUE -->
+<div class="section">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+    <span style="font-size:18px;">🔥</span>
+    <div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#22c55e;margin-bottom:2px;">Campagne active</div>
+      <div style="font-size:16px;font-weight:800;color:#1a1a2e;">Bilan Thermique</div>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table class="camp-table" style="table-layout:fixed;width:100%;">
+      <colgroup>
+        <col style="width:13%">
+        <col style="width:18%">
+        <col style="width:10%">
+        <col style="width:18%">
+        <col style="width:11%">
+        <col style="width:15%">
+        <col style="width:15%">
+      </colgroup>
+      <thead>
+        <tr>
+          <th>Période</th>
+          <th>Audience cible</th>
+          <th>Résultats</th>
+          <th>Nb de visuels actifs</th>
+          <th>Montant dépensé</th>
+          <th>Statut campagne</th>
+          <th>Statut formulaire</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>27/02/26 → 30/03/26</td>
+          <td><strong>Nouveaux prospects</strong><small>Adultes 40-70 ans, toute la France</small></td>
+          <td><strong style="font-size:16px;color:#15803d;font-weight:800;">741</strong><small>leads · CPL 20,19 €</small></td>
+          <td><strong>21 visuels actifs</strong><small>5 arrêtés (optimisation)</small><br><button onclick="toggleCreas()" id="btn-creas" style="margin-top:6px;background:#1a1a2e;color:white;border:none;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;">▶ Voir les visuels</button></td>
+          <td><strong>14 958 €</strong><small>/ 24 000 €</small></td>
+          <td><span class="badge b-live">🟢 En ligne</span></td>
+          <td><span class="form-ok">✅ Formulaire OK</span></td>
+        </tr>
+    <!-- BLOC CREAS COLD LEAD -->
+    <tr id="row-creas-cold" style="display:none;">
+      <td colspan="7" style="background:#f8faff;padding:16px 20px;">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+          <img src="https://i.imgur.com/uPcCcC8.png" style="width:100%;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" onclick="openModal(this.src)">
+          <img src="https://i.imgur.com/SvYQ8Wg.png" style="width:100%;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" onclick="openModal(this.src)">
+          <img src="https://i.imgur.com/CsUOrvq.png" style="width:100%;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" onclick="openModal(this.src)">
+          <img src="https://i.imgur.com/Td8cpqy.png" style="width:100%;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" onclick="openModal(this.src)">
+        </div>
+      </td>
+    </tr>
+        <tr>
+          <td>27/02/26 → 30/03/26</td>
+          <td><strong>Retargeting</strong><small>Visiteurs récents du site (30 j.)</small></td>
+          <td><strong style="font-size:16px;color:#15803d;font-weight:800;">167</strong><small>leads · CPL 24,27 €</small></td>
+          <td><strong>9 visuels actifs</strong><small>10 arrêtés (optimisation)</small><br><button onclick="toggleCreasRetargeting()" id="btn-creas-ret" style="margin-top:6px;background:#1a1a2e;color:white;border:none;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;">▶ Voir les visuels</button></td>
+          <td><strong>4 054 €</strong><small>/ 8 000 €</small></td>
+          <td><span class="badge b-live">🟢 En ligne</span></td>
+          <td><span class="form-ok">✅ Formulaire OK</span></td>
+        </tr>
+    <!-- BLOC CREAS RETARGETING -->
+    <tr id="row-creas-retargeting" style="display:none;">
+      <td colspan="7" style="background:#f8faff;padding:16px 20px;">
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">
+          <img src="https://i.imgur.com/DQFjGpR.png" style="width:100%;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" onclick="openModal(this.src)">
+          <img src="https://i.imgur.com/xtRbDI1.png" style="width:100%;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" onclick="openModal(this.src)">
+        </div>
+      </td>
+    </tr>
+        <tr class="budget-row">
+          <td colspan="2">💰 Total Bilan Thermique</td>
+          <td><strong style="color:#15803d;">908 leads</strong><small>741 + 167</small></td>
+          <td></td>
+          <td><strong>19 012 €</strong><small>/ 32 000 €</small></td>
+          <td colspan="2"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- AGENCES LOCALES -->
+<div class="section">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+    <span style="font-size:18px;">📍</span>
+    <div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#22c55e;margin-bottom:2px;">Campagne active</div>
+      <div style="font-size:16px;font-weight:800;color:#1a1a2e;">Agences Locales</div>
+    </div>
+  </div>
+  <p style="font-size:12.5px;color:#6b7280;margin-bottom:14px;">Chaque agence dispose de campagnes <strong>notoriété</strong> (trafic site), <strong>génération de leads</strong> et <strong>promotion de salons</strong>.</p>
+  <div class="local-grid">
+
+    <div class="local-card">
+      <h4>📍 Annecy</h4>
+      <div class="local-row">
+        <span class="lbl">Notoriété</span>
+        <span class="date">26/03 → —</span>
+        <span class="badge b-live" style="font-size:10px;padding:2px 7px;">🟢 En ligne</span>
+      </div>
+      <div class="local-row">
+        <span class="lbl">Lead</span>
+        <span class="date">25/03 → —</span>
+        <span class="badge b-wait" style="font-size:10px;padding:2px 7px;">⏳ Att. IT</span>
+      </div>
+      <div class="local-row">
+        <span class="lbl">Salon Albertville</span>
+        <span class="date">25/03 → 29/03</span>
+        <span class="badge b-live" style="font-size:10px;padding:2px 7px;">🟢 En ligne</span>
+      </div>
+      <div class="local-budget"><span>Budget total</span><span>1 700 €</span></div>
+    </div>
+
+    <div class="local-card">
+      <h4>📍 Lille</h4>
+      <div class="local-row">
+        <span class="lbl">Notoriété</span>
+        <span class="date">26/03 → —</span>
+        <span class="badge b-live" style="font-size:10px;padding:2px 7px;">🟢 En ligne</span>
+      </div>
+      <div class="local-row">
+        <span class="lbl">Lead</span>
+        <span class="date">25/03 → —</span>
+        <span class="badge b-wait" style="font-size:10px;padding:2px 7px;">⏳ Att. IT</span>
+      </div>
+      <div class="local-row">
+        <span class="lbl">Salon Arras</span>
+        <span class="date">05/03 → 08/03</span>
+        <span class="badge b-done" style="font-size:10px;padding:2px 7px;">✔️ Terminé</span>
+      </div>
+      <div class="local-row">
+        <span class="lbl">Salon Béthune</span>
+        <span class="date">25/03 → 29/03</span>
+        <span class="badge b-live" style="font-size:10px;padding:2px 7px;">🟢 En ligne</span>
+      </div>
+      <div class="local-row">
+        <span class="lbl">Salon Dunkerque</span>
+        <span class="date">01/04 → 12/04</span>
+        <span class="badge b-soon" style="font-size:10px;padding:2px 7px;">📅 Programmé</span>
+      </div>
+      <div class="local-budget"><span>Budget total</span><span>1 830 €</span></div>
+    </div>
+
+    <div class="local-card">
+      <h4>📍 Draguignan</h4>
+      <div class="local-row">
+        <span class="lbl">Notoriété</span>
+        <span class="date">26/03 → —</span>
+        <span class="badge b-live" style="font-size:10px;padding:2px 7px;">🟢 En ligne</span>
+      </div>
+      <div class="local-row">
+        <span class="lbl">Lead</span>
+        <span class="date">25/03 → —</span>
+        <span class="badge b-wait" style="font-size:10px;padding:2px 7px;">⏳ Att. IT</span>
+      </div>
+      <div class="local-row">
+        <span class="lbl">Salon</span>
+        <span class="date">—</span>
+        <span class="badge b-wait" style="font-size:10px;padding:2px 7px;">⏳ En attente</span>
+      </div>
+      <div class="local-budget"><span>Budget total</span><span>1 600 €</span></div>
+    </div>
+
+    <div class="local-card">
+      <h4>📍 Bordeaux</h4>
+      <div class="local-row">
+        <span class="lbl">Notoriété</span>
+        <span class="date">26/03 → —</span>
+        <span class="badge b-live" style="font-size:10px;padding:2px 7px;">🟢 En ligne</span>
+      </div>
+      <div class="local-row">
+        <span class="lbl">Lead</span>
+        <span class="date">25/03 → —</span>
+        <span class="badge b-wait" style="font-size:10px;padding:2px 7px;">⏳ Att. IT</span>
+      </div>
+      <div class="local-row">
+        <span class="lbl">Salon Arcachon</span>
+        <span class="date">25/03 → 29/03</span>
+        <span class="badge b-live" style="font-size:10px;padding:2px 7px;">🟢 En ligne</span>
+      </div>
+      <div class="local-budget"><span>Budget total</span><span>1 700 €</span></div>
+    </div>
+
+    <div class="local-card">
+      <h4>📍 Caen</h4>
+      <div class="local-row">
+        <span class="lbl">Notoriété</span>
+        <span class="date">26/03 → —</span>
+        <span class="badge b-live" style="font-size:10px;padding:2px 7px;">🟢 En ligne</span>
+      </div>
+      <div class="local-row">
+        <span class="lbl">Lead</span>
+        <span class="date">25/03 → —</span>
+        <span class="badge b-wait" style="font-size:10px;padding:2px 7px;">⏳ Att. IT</span>
+      </div>
+      <div class="local-row">
+        <span class="lbl">Salon La Ferté</span>
+        <span class="date">25/03 → 29/03</span>
+        <span class="badge b-live" style="font-size:10px;padding:2px 7px;">🟢 En ligne</span>
+      </div>
+      <div class="local-budget"><span>Budget total</span><span>1 700 €</span></div>
+    </div>
+
+    <div class="local-card">
+      <h4>📍 Entzheim (Strasbourg)</h4>
+      <div class="local-row">
+        <span class="lbl">Notoriété</span>
+        <span class="date">26/03 → —</span>
+        <span class="badge b-live" style="font-size:10px;padding:2px 7px;">🟢 En ligne</span>
+      </div>
+      <div class="local-row">
+        <span class="lbl">Lead</span>
+        <span class="date">25/03 → —</span>
+        <span class="badge b-wait" style="font-size:10px;padding:2px 7px;">⏳ Att. IT</span>
+      </div>
+      <div class="local-row">
+        <span class="lbl">Salon St-Dié</span>
+        <span class="date">25/03 → 29/03</span>
+        <span class="badge b-live" style="font-size:10px;padding:2px 7px;">🟢 En ligne</span>
+      </div>
+      <div class="local-row">
+        <span class="lbl">Foire Bar-sur-Seine</span>
+        <span class="date">01/04 → 12/04</span>
+        <span class="badge b-soon" style="font-size:10px;padding:2px 7px;">📅 Programmé</span>
+      </div>
+      <div class="local-row">
+        <span class="lbl">Foire Montbéliard</span>
+        <span class="date">10/04 → 20/04</span>
+        <span class="badge b-soon" style="font-size:10px;padding:2px 7px;">📅 Programmé</span>
+      </div>
+      <div class="local-budget"><span>Budget total</span><span>1 900 €</span></div>
+    </div>
+
+    <div class="local-card">
+      <h4>📍 Le Puy</h4>
+      <div class="local-row">
+        <span class="lbl">Notoriété</span>
+        <span class="date">26/03 → —</span>
+        <span class="badge b-live" style="font-size:10px;padding:2px 7px;">🟢 En ligne</span>
+      </div>
+      <div class="local-row">
+        <span class="lbl">Lead</span>
+        <span class="date">25/03 → —</span>
+        <span class="badge b-wait" style="font-size:10px;padding:2px 7px;">⏳ Att. IT</span>
+      </div>
+      <div class="local-row">
+        <span class="lbl">Foire Montbrison</span>
+        <span class="date">01/04 → 12/04</span>
+        <span class="badge b-live" style="font-size:10px;padding:2px 7px;">🟢 En ligne</span>
+      </div>
+      <div class="local-row">
+        <span class="lbl">Salon Mende</span>
+        <span class="date">01/04 → 12/04</span>
+        <span class="badge b-soon" style="font-size:10px;padding:2px 7px;">📅 Programmé</span>
+      </div>
+      <div class="local-budget"><span>Budget total</span><span>1 800 €</span></div>
+    </div>
+
+    <div class="local-card">
+      <h4>📍 Montpellier</h4>
+      <div class="local-row">
+        <span class="lbl">Notoriété</span>
+        <span class="date">26/03 → —</span>
+        <span class="badge b-live" style="font-size:10px;padding:2px 7px;">🟢 En ligne</span>
+      </div>
+      <div class="local-row">
+        <span class="lbl">Lead</span>
+        <span class="date">25/03 → —</span>
+        <span class="badge b-wait" style="font-size:10px;padding:2px 7px;">⏳ Att. IT</span>
+      </div>
+      <div class="local-row">
+        <span class="lbl">Salon</span>
+        <span class="date">En préparation</span>
+        <span class="badge b-enc" style="font-size:10px;padding:2px 7px;">🔵 En cours</span>
+      </div>
+      <div class="local-budget"><span>Budget total</span><span>1 600 €</span></div>
+    </div>
+
+    <div class="local-card">
+      <h4>📍 Orléans</h4>
+      <div class="local-row">
+        <span class="lbl">Notoriété</span>
+        <span class="date">26/03 → —</span>
+        <span class="badge b-live" style="font-size:10px;padding:2px 7px;">🟢 En ligne</span>
+      </div>
+      <div class="local-row">
+        <span class="lbl">Lead</span>
+        <span class="date">25/03 → —</span>
+        <span class="badge b-wait" style="font-size:10px;padding:2px 7px;">⏳ Att. IT</span>
+      </div>
+      <div class="local-row">
+        <span class="lbl">Salon</span>
+        <span class="date">—</span>
+        <span class="badge b-wait" style="font-size:10px;padding:2px 7px;">⏳ En attente</span>
+      </div>
+      <div class="local-budget"><span>Budget total</span><span>1 600 €</span></div>
+    </div>
+
+    <div class="local-card">
+      <h4>📍 Pau</h4>
+      <div class="local-row">
+        <span class="lbl">Notoriété</span>
+        <span class="date">26/03 → —</span>
+        <span class="badge b-live" style="font-size:10px;padding:2px 7px;">🟢 En ligne</span>
+      </div>
+      <div class="local-row">
+        <span class="lbl">Lead</span>
+        <span class="date">25/03 → —</span>
+        <span class="badge b-wait" style="font-size:10px;padding:2px 7px;">⏳ Att. IT</span>
+      </div>
+      <div class="local-row">
+        <span class="lbl">Galerie Ibos (1)</span>
+        <span class="date">25/03 → 28/03</span>
+        <span class="badge b-live" style="font-size:10px;padding:2px 7px;">🟢 En ligne</span>
+      </div>
+      <div class="local-row">
+        <span class="lbl">Galerie Ibos (2)</span>
+        <span class="date">10/04 → 18/04</span>
+        <span class="badge b-soon" style="font-size:10px;padding:2px 7px;">📅 Programmé</span>
+      </div>
+      <div class="local-budget"><span>Budget total</span><span>1 800 €</span></div>
+    </div>
+
+    <div class="local-card">
+      <h4>📍 Vannes</h4>
+      <div class="local-row">
+        <span class="lbl">Notoriété</span>
+        <span class="date">26/03 → —</span>
+        <span class="badge b-live" style="font-size:10px;padding:2px 7px;">🟢 En ligne</span>
+      </div>
+      <div class="local-row">
+        <span class="lbl">Lead</span>
+        <span class="date">25/03 → —</span>
+        <span class="badge b-wait" style="font-size:10px;padding:2px 7px;">⏳ Att. IT</span>
+      </div>
+      <div class="local-row">
+        <span class="lbl">Salon Viving Vannes</span>
+        <span class="date">05/03 → 08/03</span>
+        <span class="badge b-done" style="font-size:10px;padding:2px 7px;">✔️ Terminé</span>
+      </div>
+      <div class="local-row">
+        <span class="lbl">Salon Ploërmel</span>
+        <span class="date">25/03 → 29/03</span>
+        <span class="badge b-live" style="font-size:10px;padding:2px 7px;">🟢 En ligne</span>
+      </div>
+      <div class="local-budget"><span>Budget total</span><span>1 730 €</span></div>
+    </div>
+
+  </div>
+
+  <div style="background:#f0f4ff;border-radius:10px;padding:14px 20px;margin-top:16px;display:flex;justify-content:space-between;align-items:center;">
+    <div><span style="font-size:13px;font-weight:700;color:#1d4ed8;">💰 Budget total Agences Locales</span><div style="font-size:11px;color:#6b7280;margin-top:2px;">Période : 26/03/2026 → 30/04/2026</div></div><span style="font-size:20px;font-weight:900;color:#1d4ed8;">18 960 €</span>
+  </div>
+
+</div>
+
+<!-- VIDEO FACTORY -->
+<div class="section">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+    <span style="font-size:18px;">🎬</span>
+    <div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#22c55e;margin-bottom:2px;">Campagne active</div>
+      <div style="font-size:16px;font-weight:800;color:#1a1a2e;">Vidéo Factory</div>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table class="camp-table">
+      <thead>
+        <tr>
+          <th>Vidéo</th>
+          <th>Plateforme</th>
+          <th>Période de diffusion</th>
+          <th>Budget</th>
+          <th>Statut campagne</th>
+          <th>Statut formulaire</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Les Bonnes Résolutions</td>
+          <td>Facebook + Instagram</td>
+          <td>14/01 → 26/01/26</td>
+          <td>250 €</td>
+          <td><span class="badge b-done">✔️ Terminée</span></td>
+          <td><span class="form-lp">🔗 LP</span></td>
+        </tr>
+        <tr>
+          <td>Simulateur Économies</td>
+          <td>Facebook + Instagram</td>
+          <td>16/01 → 30/01/26</td>
+          <td>250 €</td>
+          <td><span class="badge b-done">✔️ Terminée</span></td>
+          <td><span class="form-lp">🔗 LP</span></td>
+        </tr>
+        <tr>
+          <td>Convecteur vs Aterno</td>
+          <td>Facebook + Instagram</td>
+          <td>30/01 → 09/02/26</td>
+          <td>250 €</td>
+          <td><span class="badge b-done">✔️ Terminée</span></td>
+          <td><span class="form-no">— Sans formulaire</span></td>
+        </tr>
+        <tr>
+          <td>Pingouin</td>
+          <td>Facebook + Instagram</td>
+          <td>30/01 → 09/02/26</td>
+          <td>250 €</td>
+          <td><span class="badge b-done">✔️ Terminée</span></td>
+          <td><span class="form-no">— Sans formulaire</span></td>
+        </tr>
+        <tr>
+          <td>Aterno For Sure</td>
+          <td>Facebook + Instagram</td>
+          <td>04/02 → 16/02/26</td>
+          <td>250 €</td>
+          <td><span class="badge b-done">✔️ Terminée</span></td>
+          <td><span class="form-no">— Sans formulaire</span></td>
+        </tr>
+        <tr>
+          <td>Brique Kalith</td>
+          <td>Facebook + Instagram</td>
+          <td>14/02/26 → —</td>
+          <td>250 €</td>
+          <td><span class="badge b-done">✔️ Terminée</span></td>
+          <td><span class="form-lp">🔗 LP</span></td>
+        </tr>
+        <tr>
+          <td>Cannelures</td>
+          <td>Facebook + Instagram</td>
+          <td>20/02 → 28/02/26</td>
+          <td>250 €</td>
+          <td><span class="badge b-done">✔️ Terminée</span></td>
+          <td><span class="form-no">— Sans formulaire</span></td>
+        </tr>
+        <tr>
+          <td>Video Trend Aterno</td>
+          <td>Facebook + Instagram</td>
+          <td>26/02 → 12/03/26</td>
+          <td>250 €</td>
+          <td><span class="badge b-done">✔️ Terminée</span></td>
+          <td><span class="form-no">— Sans formulaire</span></td>
+        </tr>
+        <tr>
+          <td>Offre Printemps <span style="color:#b91c1c;font-size:11px">(annulée)</span></td>
+          <td>Facebook + Instagram</td>
+          <td>05/03 → 14/03/26</td>
+          <td>300 €</td>
+          <td><span class="badge b-cancel">❌ Annulée</span></td>
+          <td><span class="form-no">— Sans formulaire</span></td>
+        </tr>
+        <tr>
+          <td>Installation Terrasse du Héron (Lille)</td>
+          <td>Facebook + Instagram</td>
+          <td>11/03 → 20/03/26</td>
+          <td>250 €</td>
+          <td><span class="badge b-done">✔️ Terminée</span></td>
+          <td><span class="form-no">— Sans formulaire</span></td>
+        </tr>
+        <tr>
+          <td>Panneaux Solaires Lille</td>
+          <td>Facebook + Instagram</td>
+          <td>18/03 → 30/03/26</td>
+          <td>250 €</td>
+          <td><span class="badge b-live">🟢 En ligne</span></td>
+          <td><span class="form-no">— Sans formulaire</span></td>
+        </tr>
+        <tr>
+          <td>Présentation Gammes</td>
+          <td>Facebook + Instagram</td>
+          <td>25/03 → 07/04/26</td>
+          <td>250 €</td>
+          <td><span class="badge b-live">🟢 En ligne</span></td>
+          <td><span class="form-no">— Sans formulaire</span></td>
+        </tr>
+        <tr>
+          <td>VF-13 à VF-52 (40 prochaines vidéos)</td>
+          <td>Facebook + Instagram</td>
+          <td>À planifier</td>
+          <td>—</td>
+          <td><span class="badge b-enc">🔵 En préparation</span></td>
+          <td><span class="form-no">— Sans formulaire</span></td>
+        </tr>
+        <tr class="budget-row">
+          <td colspan="3">💰 Total Vidéo Factory</td>
+          <td><strong>3 050 €</strong></td>
+          <td colspan="2"></td>
+        </tr>
+        <tr style="background:#f0f9ff;border-top:2px solid #bfdbfe;">
+          <td colspan="6" style="padding:16px 20px;">
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
+              <div style="background:white;border-radius:10px;padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,0.07);text-align:center;">
+                <div style="font-size:11px;color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Résultats</div>
+                <div style="font-size:22px;font-weight:900;color:#1a1a2e;">307 448</div>
+                <div style="font-size:11px;color:#9ca3af;margin-top:2px;">clics / engagements</div>
+              </div>
+              <div style="background:white;border-radius:10px;padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,0.07);text-align:center;">
+                <div style="font-size:11px;color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Coût / résultat</div>
+                <div style="font-size:22px;font-weight:900;color:#1a1a2e;">0,35 €</div>
+                <div style="font-size:11px;color:#9ca3af;margin-top:2px;">moyenne brute</div>
+              </div>
+              <div style="background:white;border-radius:10px;padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,0.07);text-align:center;">
+                <div style="font-size:11px;color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Dépenses totales</div>
+                <div style="font-size:22px;font-weight:900;color:#1d4ed8;">2 653 €</div>
+                <div style="font-size:11px;color:#9ca3af;margin-top:2px;">sur budget 3 050 €</div>
+              </div>
+              <div style="background:white;border-radius:10px;padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,0.07);text-align:center;">
+                <div style="font-size:11px;color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Impressions</div>
+                <div style="font-size:22px;font-weight:900;color:#1a1a2e;">1 067 932</div>
+                <div style="font-size:11px;color:#9ca3af;margin-top:2px;">&nbsp;</div>
+              </div>
+              <div style="background:white;border-radius:10px;padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,0.07);text-align:center;">
+                <div style="font-size:11px;color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Couverture</div>
+                <div style="font-size:22px;font-weight:900;color:#1a1a2e;">558 298</div>
+                <div style="font-size:11px;color:#9ca3af;margin-top:2px;">personnes atteintes</div>
+              </div>
+              <div style="background:white;border-radius:10px;padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,0.07);text-align:center;">
+                <div style="font-size:11px;color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Fréquence</div>
+                <div style="font-size:22px;font-weight:900;color:#1a1a2e;">4,44</div>
+                <div style="font-size:11px;color:#9ca3af;margin-top:2px;">vues / personne</div>
+              </div>
+              <div style="background:white;border-radius:10px;padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,0.07);text-align:center;">
+                <div style="font-size:11px;color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">CPM</div>
+                <div style="font-size:22px;font-weight:900;color:#1a1a2e;">7,39 €</div>
+                <div style="font-size:11px;color:#9ca3af;margin-top:2px;">pour 1 000 impressions</div>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div style="text-align:center;margin-top:16px;">
+    <a href="https://docs.google.com/presentation/d/1T5Eo_4d8rXugxGjpadb3E6hQfGme06OIte1IuIeWARY/edit?slide=id.g38663cab72e_0_0#slide=id.g38663cab72e_0_0" target="_blank" style="display:inline-flex;align-items:center;gap:10px;background:#1a1a2e;color:white;text-decoration:none;padding:12px 24px;border-radius:10px;font-size:13px;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,0.15);" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+      <span style="font-size:16px;">🎬</span> Voir toutes les vidéos de la campagne <span style="font-size:12px;opacity:0.6;">↗</span>
+    </a>
+  </div>
+</div>
+
+<!-- SÉPARATEUR À VENIR -->
+<div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;margin-top:10px;">
+  <div style="background:#7c3aed;border-radius:8px;padding:6px 16px;display:flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(124,58,237,0.3);">
+    <span style="font-size:14px;">📅</span>
+    <span style="font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:white;">Campagnes à venir</span>
+  </div>
+  <div style="flex:1;height:1px;background:linear-gradient(to right,#7c3aed40,transparent);"></div>
+</div>
+
+<!-- SOLAIRE -->
+<div class="section">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+    <span style="font-size:18px;">☀️</span>
+    <div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#7c3aed;margin-bottom:2px;">Campagne à venir</div>
+      <div style="font-size:16px;font-weight:800;color:#1a1a2e;">Solaire</div>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table class="camp-table">
+      <thead>
+        <tr>
+          <th>Audience cible</th>
+          <th>Objectif</th>
+          <th>Nb de visuels actifs</th>
+          <th>Budget</th>
+          <th>Statut campagne</th>
+          <th>Statut formulaire</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Nouveaux prospects</strong><small>Adultes 33 ans+ · Intérêt habitat & énergies renouvelables</small></td>
+          <td>Générer des demandes de bilan solaire</td>
+          <td><strong>13 visuels prévus</strong><br><button onclick="toggleCreasSolaire()" id="btn-creas-sol" style="margin-top:6px;background:#1a1a2e;color:white;border:none;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;">▶ Voir les visuels</button></td>
+          <td><strong>18 000 €</strong></td>
+          <td><span class="badge b-wait">⏳ En attente GO Aterno</span></td>
+          <td><span class="form-wait">⏳ Attente IT</span></td>
+        </tr>
+            <!-- BLOC CREAS SOLAIRE -->
+    <tr id="row-creas-solaire" style="display:none;">
+      <td colspan="6" style="background:#f8faff;padding:16px 20px;">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+          <img src="https://i.imgur.com/sfV2Dl8.png" style="width:100%;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" onclick="openModal(this.src)">
+          <img src="https://i.imgur.com/I6SeZjG.png" style="width:100%;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" onclick="openModal(this.src)">
+          <img src="https://i.imgur.com/xubSF8t.png" style="width:100%;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" onclick="openModal(this.src)">
+          <img src="https://i.imgur.com/eWYVFI4.png" style="width:100%;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" onclick="openModal(this.src)">
+        </div>
+      </td>
+    </tr>
+        <tr class="budget-row">
+          <td colspan="3">💰 Total Solaire</td>
+          <td><strong>18 000 €</strong></td>
+          <td colspan="2"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:12px;color:#6b7280;margin-top:8px;">ℹ️ Campagne prête. En attente du GO côté Aterno (validation IT requise pour la mise en ligne du formulaire).</p>
+</div>
+
+
+<!-- SÉPARATEUR CAMPAGNES TERMINÉES -->
+<div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;margin-top:10px;">
+  <div style="background:#6b7280;border-radius:8px;padding:6px 16px;display:flex;align-items:center;gap:8px;">
+    <span style="font-size:14px;">✔️</span>
+    <span style="font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:white;">Campagnes terminées</span>
+  </div>
+  <div style="flex:1;height:1px;background:linear-gradient(to right,#6b728040,transparent);"></div>
+</div>
+
+<!-- CHAUFFAGE ANCIEN WORDING -->
+<div class="section">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+    <span style="font-size:18px;">🔥</span>
+    <div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#6b7280;margin-bottom:2px;">Campagne terminée</div>
+      <div style="font-size:16px;font-weight:800;color:#1a1a2e;">Chauffage — Ancien wording</div>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table class="camp-table">
+      <thead>
+        <tr>
+          <th>Période</th>
+          <th>Résultats (leads)</th>
+          <th>Coût / lead</th>
+          <th>Montant dépensé</th>
+          <th>Impressions</th>
+          <th>Couverture</th>
+          <th>Répétition</th>
+          <th>CPM</th>
+          <th>Clics</th>
+          <th>Statut</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>01/01/2026 → 04/03/2026</td>
+          <td><strong style="font-size:16px;color:#15803d;font-weight:800;">4 263</strong><small>leads générés</small></td>
+          <td><strong>9,88 €</strong></td>
+          <td><strong>42 115 €</strong></td>
+          <td>12 534 942</td>
+          <td>1 547 463</td>
+          <td>8,10</td>
+          <td>3,36 €</td>
+          <td>94 249</td>
+          <td><span class="badge b-done">✔️ Terminée</span></td>
+        </tr>
+        <tr class="budget-row">
+          <td colspan="9">💰 Chauffage — Ancien wording</td>
+          <td><button onclick="toggleVisuels('creas-chauffage-ancien')" style="background:#1a1a2e;color:white;border:none;border-radius:6px;padding:5px 12px;font-size:11px;cursor:pointer;white-space:nowrap;">▶ Voir les visuels</button></td>
+        </tr>
+        <tr id="creas-chauffage-ancien" style="display:none;">
+          <td colspan="12" style="background:#f8faff;padding:16px 20px;">
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+          <img src="https://i.imgur.com/0ljBhi9.png" style="width:100%;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" onclick="openModal(this.src)">
+          <img src="https://i.imgur.com/ZLlrQCm.png" style="width:100%;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" onclick="openModal(this.src)">
+          <img src="https://i.imgur.com/09pjn4x.png" style="width:100%;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" onclick="openModal(this.src)">
+          <img src="https://i.imgur.com/aCg6peF.png" style="width:100%;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" onclick="openModal(this.src)">
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- CHAUFFE-EAU -->
+<div class="section">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+    <span style="font-size:18px;">🚿</span>
+    <div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#6b7280;margin-bottom:2px;">Campagne terminée</div>
+      <div style="font-size:16px;font-weight:800;color:#1a1a2e;">Chauffe-eau</div>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table class="camp-table">
+      <thead>
+        <tr>
+          <th>Période</th>
+          <th>Résultats (leads)</th>
+          <th>Coût / lead</th>
+          <th>Montant dépensé</th>
+          <th>Impressions</th>
+          <th>Couverture</th>
+          <th>Répétition</th>
+          <th>CPM</th>
+          <th>Clics</th>
+          <th>Statut</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>01/01/2026 → 15/03/2026</td>
+          <td><strong style="font-size:16px;color:#15803d;font-weight:800;">395</strong><small>leads générés</small></td>
+          <td><strong>7,11 €</strong></td>
+          <td><strong>2 809 €</strong></td>
+          <td>665 139</td>
+          <td>259 833</td>
+          <td>2,56</td>
+          <td>4,22 €</td>
+          <td>4 745</td>
+          <td><span class="badge b-done">✔️ Terminée</span></td>
+        </tr>
+        <tr class="budget-row">
+          <td colspan="9">💰 Chauffe-eau</td>
+          <td><button onclick="toggleVisuels('creas-chauffe-eau')" style="background:#1a1a2e;color:white;border:none;border-radius:6px;padding:5px 12px;font-size:11px;cursor:pointer;white-space:nowrap;">▶ Voir les visuels</button></td>
+        </tr>
+        <tr id="creas-chauffe-eau" style="display:none;">
+          <td colspan="12" style="background:#f8faff;padding:16px 20px;">
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+          <img src="https://i.imgur.com/lruOiaO.png" style="width:100%;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" onclick="openModal(this.src)">
+          <img src="https://i.imgur.com/i1PgOfB.png" style="width:100%;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" onclick="openModal(this.src)">
+          <img src="https://i.imgur.com/vAko9uc.png" style="width:100%;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" onclick="openModal(this.src)">
+          <img src="https://i.imgur.com/kZoi6pK.png" style="width:100%;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" onclick="openModal(this.src)">
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- THERMOSTAT APP GROUPED -->
+<div class="section">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+    <span style="font-size:18px;">🌡️</span>
+    <div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#6b7280;margin-bottom:2px;">Campagne terminée</div>
+      <div style="font-size:16px;font-weight:800;color:#1a1a2e;">Thermostat + Application offerts</div>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table class="camp-table">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Période</th>
+          <th>Résultats</th>
+          <th>Coût / résultat</th>
+          <th>Montant dépensé</th>
+          <th>Impressions</th>
+          <th>Couverture</th>
+          <th>Répétition</th>
+          <th>CPM</th>
+          <th>Clics</th>
+          <th>Redirection</th>
+          <th>Statut</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Trafic site</strong></td>
+          <td>01/01/2026 → 20/01/2026</td>
+          <td><strong style="font-size:16px;color:#15803d;font-weight:800;">3 498</strong><small>clics lien</small></td>
+          <td><strong>0,11 €</strong></td>
+          <td><strong>373 €</strong></td>
+          <td>285 208</td>
+          <td>142 568</td>
+          <td>2,00</td>
+          <td>1,31 €</td>
+          <td>3 498</td>
+          <td><span class="form-lp">🔗 LP</span></td>
+          <td><span class="badge b-done">✔️ Terminée</span></td>
+        </tr>
+        <tr>
+          <td><strong>Formulaire Meta</strong></td>
+          <td>01/01/2026 → 27/01/2026</td>
+          <td><strong style="font-size:16px;color:#15803d;font-weight:800;">32</strong><small>leads générés</small></td>
+          <td><strong>31,23 €</strong></td>
+          <td><strong>999 €</strong></td>
+          <td>59 657</td>
+          <td>21 802</td>
+          <td>2,74</td>
+          <td>16,75 €</td>
+          <td>484</td>
+          <td><span class="form-fin">📁 Formulaire Meta</span></td>
+          <td><span class="badge b-done">✔️ Terminée</span></td>
+        </tr>
+        <tr class="budget-row">
+          <td colspan="4">💰 Total Thermostat + Application offerts</td>
+          <td><strong>1 372 €</strong></td>
+          <td colspan="6"></td>
+          <td><button onclick="toggleVisuels('creas-thermostat')" style="background:#1a1a2e;color:white;border:none;border-radius:6px;padding:5px 12px;font-size:11px;cursor:pointer;white-space:nowrap;">▶ Voir les visuels</button></td>
+        </tr>
+        <tr id="creas-thermostat" style="display:none;">
+          <td colspan="12" style="background:#f8faff;padding:16px 20px;">
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+          <img src="https://i.imgur.com/fvHvLgn.png" style="width:100%;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" onclick="openModal(this.src)">
+          <img src="https://i.imgur.com/3cO1rE5.png" style="width:100%;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" onclick="openModal(this.src)">
+          <img src="https://i.imgur.com/QHqwcNG.png" style="width:100%;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" onclick="openModal(this.src)">
+          <img src="https://i.imgur.com/BpMY5zW.png" style="width:100%;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" onclick="openModal(this.src)">
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- FINANCEMENT 0% GROUPED -->
+<div class="section">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+    <span style="font-size:18px;">💳</span>
+    <div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#6b7280;margin-bottom:2px;">Campagne terminée</div>
+      <div style="font-size:16px;font-weight:800;color:#1a1a2e;">Financement 0% / 4x sans frais</div>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table class="camp-table">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Période</th>
+          <th>Résultats</th>
+          <th>Coût / résultat</th>
+          <th>Montant dépensé</th>
+          <th>Impressions</th>
+          <th>Couverture</th>
+          <th>Répétition</th>
+          <th>CPM</th>
+          <th>Clics</th>
+          <th>Redirection</th>
+          <th>Statut</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Trafic site</strong></td>
+          <td>01/01/2026 → 20/01/2026</td>
+          <td><strong style="font-size:16px;color:#15803d;font-weight:800;">3 699</strong><small>clics lien</small></td>
+          <td><strong>0,10 €</strong></td>
+          <td><strong>363 €</strong></td>
+          <td>361 313</td>
+          <td>140 563</td>
+          <td>2,57</td>
+          <td>1,01 €</td>
+          <td>3 699</td>
+          <td><span class="form-lp">🔗 LP</span></td>
+          <td><span class="badge b-done">✔️ Terminée</span></td>
+        </tr>
+        <tr>
+          <td><strong>Formulaire Meta</strong></td>
+          <td>01/01/2026 → 20/01/2026</td>
+          <td><strong style="font-size:16px;color:#15803d;font-weight:800;">4</strong><small>leads générés</small></td>
+          <td><strong>67,51 €</strong></td>
+          <td><strong>270 €</strong></td>
+          <td>12 357</td>
+          <td>5 745</td>
+          <td>2,15</td>
+          <td>21,85 €</td>
+          <td>111</td>
+          <td><span class="form-fin">📁 Formulaire Meta</span></td>
+          <td><span class="badge b-done">✔️ Terminée</span></td>
+        </tr>
+        <tr class="budget-row">
+          <td colspan="4">💰 Total Financement 0% / 4x sans frais</td>
+          <td><strong>633 €</strong></td>
+          <td colspan="6"></td>
+          <td><button onclick="toggleVisuels('creas-financement')" style="background:#1a1a2e;color:white;border:none;border-radius:6px;padding:5px 12px;font-size:11px;cursor:pointer;white-space:nowrap;">▶ Voir les visuels</button></td>
+        </tr>
+        <tr id="creas-financement" style="display:none;">
+          <td colspan="12" style="background:#f8faff;padding:16px 20px;">
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+          <img src="https://i.imgur.com/2pZEJXq.png" style="width:100%;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" onclick="openModal(this.src)">
+          <img src="https://i.imgur.com/6K3gcUn.png" style="width:100%;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" onclick="openModal(this.src)">
+          <img src="https://i.imgur.com/qDrypOA.png" style="width:100%;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" onclick="openModal(this.src)">
+          <img src="https://i.imgur.com/W5zgBR4.png" style="width:100%;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" onclick="openModal(this.src)">
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- GUIDE CHAUFFAGE -->
+<div class="section">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+    <span style="font-size:18px;">📘</span>
+    <div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#6b7280;margin-bottom:2px;">Campagne terminée</div>
+      <div style="font-size:16px;font-weight:800;color:#1a1a2e;">Guide Chauffage</div>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table class="camp-table">
+      <thead>
+        <tr>
+          <th>Période</th>
+          <th>Résultats (leads)</th>
+          <th>Coût / lead</th>
+          <th>Montant dépensé</th>
+          <th>Impressions</th>
+          <th>Couverture</th>
+          <th>Répétition</th>
+          <th>CPM</th>
+          <th>Clics</th>
+          <th>Statut</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>28/02/2026 → 18/03/2026</td>
+          <td><strong style="font-size:16px;color:#15803d;font-weight:800;">28</strong><small>leads générés</small></td>
+          <td><strong>13,31 €</strong></td>
+          <td><strong>373 €</strong></td>
+          <td>75 830</td>
+          <td>50 587</td>
+          <td>1,50</td>
+          <td>4,92 €</td>
+          <td>488</td>
+          <td><span class="badge b-done">✔️ Terminée</span></td>
+        </tr>
+        <tr class="budget-row">
+          <td colspan="9">💰 Guide Chauffage</td>
+          <td><button onclick="toggleVisuels('creas-guide')" style="background:#1a1a2e;color:white;border:none;border-radius:6px;padding:5px 12px;font-size:11px;cursor:pointer;white-space:nowrap;">▶ Voir les visuels</button></td>
+        </tr>
+        <tr id="creas-guide" style="display:none;">
+          <td colspan="12" style="background:#f8faff;padding:16px 20px;">
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+          <img src="https://i.imgur.com/fwqwjFT.png" style="width:100%;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" onclick="openModal(this.src)">
+          <img src="https://i.imgur.com/BJ8d7yZ.png" style="width:100%;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" onclick="openModal(this.src)">
+          <img src="https://i.imgur.com/pKwTap6.png" style="width:100%;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" onclick="openModal(this.src)">
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- SIMULATEUR -->
+<div class="section">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+    <span style="font-size:18px;">🧮</span>
+    <div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#6b7280;margin-bottom:2px;">Campagne terminée</div>
+      <div style="font-size:16px;font-weight:800;color:#1a1a2e;">Simulateur</div>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table class="camp-table">
+      <thead>
+        <tr>
+          <th>Période</th>
+          <th>Résultats (conversions)</th>
+          <th>Coût / résultat</th>
+          <th>Montant dépensé</th>
+          <th>Impressions</th>
+          <th>Couverture</th>
+          <th>Répétition</th>
+          <th>CPM</th>
+          <th>Clics</th>
+          <th>Statut</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>28/02/2026 → 18/03/2026</td>
+          <td><strong style="font-size:16px;color:#15803d;font-weight:800;">7</strong><small>conversions</small></td>
+          <td><strong>64,35 €</strong></td>
+          <td><strong>450,47 €</strong></td>
+          <td>24 055</td>
+          <td>13 759</td>
+          <td>1,75</td>
+          <td>18,73 €</td>
+          <td>1 346</td>
+          <td><span class="badge b-done">✔️ Terminée</span></td>
+        </tr>
+        <tr class="budget-row">
+          <td colspan="9">💰 Simulateur</td>
+          <td><button onclick="toggleVisuels('creas-simulateur')" style="background:#1a1a2e;color:white;border:none;border-radius:6px;padding:5px 12px;font-size:11px;cursor:pointer;white-space:nowrap;">▶ Voir les visuels</button></td>
+        </tr>
+        <tr id="creas-simulateur" style="display:none;">
+          <td colspan="12" style="background:#f8faff;padding:16px 20px;">
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+          <img src="https://i.imgur.com/uWdquGF.png" style="width:100%;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" onclick="openModal(this.src)">
+          <img src="https://i.imgur.com/kuocqXF.png" style="width:100%;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" onclick="openModal(this.src)">
+          <img src="https://i.imgur.com/jiCivpC.png" style="width:100%;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" onclick="openModal(this.src)">
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- OFFRES 2+1 -->
+<div class="section">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+    <span style="font-size:18px;">🎁</span>
+    <div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#6b7280;margin-bottom:2px;">Campagne terminée</div>
+      <div style="font-size:16px;font-weight:800;color:#1a1a2e;">Offre Printemps 2+1</div>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table class="camp-table">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Période de diffusion</th>
+          <th>Leads</th>
+          <th>CPL</th>
+          <th>Montant dépensé</th>
+          <th>Statut campagne</th>
+          <th>Statut formulaire</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Nouveaux prospects</td>
+          <td>05/03 → 20/03/26</td>
+          <td><strong style="color:#15803d;">24</strong></td>
+          <td><strong>153,44 €</strong></td>
+          <td><strong>3 682,44 €</strong></td>
+          <td><span class="badge b-done">✔️ Terminée</span></td>
+          <td><span class="form-lp">🔗 LP</span></td>
+        </tr>
+        <tr>
+          <td>Retargeting — Page de destination</td>
+          <td>12/03 → 20/03/26</td>
+          <td><strong style="color:#6b7280;">0</strong></td>
+          <td><strong>—</strong></td>
+          <td><strong>432,53 €</strong></td>
+          <td><span class="badge b-done">✔️ Terminée</span></td>
+          <td><span class="form-lp">🔗 LP</span></td>
+        </tr>
+        <tr>
+          <td>Retargeting — Formulaire Meta</td>
+          <td>05/03 → 20/03/26</td>
+          <td><strong style="color:#15803d;">61</strong></td>
+          <td><strong>47,62 €</strong></td>
+          <td><strong>2 904,71 €</strong></td>
+          <td><span class="badge b-done">✔️ Terminée</span></td>
+          <td><span class="form-fin">📁 Formulaire Offre</span></td>
+        </tr>
+        <tr class="budget-row">
+          <td colspan="2">💰 Total Offres 2+1</td>
+          <td><strong style="color:#15803d;">85 leads</strong></td>
+          <td></td>
+          <td><strong>7 019,68 €</strong></td>
+          <td></td>
+          <td><button onclick="toggleCreasOffre()" id="btn-creas-offre" style="background:#1a1a2e;color:white;border:none;border-radius:6px;padding:5px 12px;font-size:11px;cursor:pointer;white-space:nowrap;">▶ Voir les visuels</button></td>
+        </tr>
+    <!-- BLOC CREAS OFFRE -->
+    <tr id="row-creas-offre" style="display:none;">
+      <td colspan="6" style="background:#f8faff;padding:16px 20px;">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+          <img src="https://i.imgur.com/NBikzao.png" style="width:100%;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" onclick="openModal(this.src)">
+          <img src="https://i.imgur.com/drvrQl9.png" style="width:100%;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" onclick="openModal(this.src)">
+          <img src="https://i.imgur.com/dyxwOxx.png" style="width:100%;border-radius:8px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'" onclick="openModal(this.src)">
+        </div>
+      </td>
+    </tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:12px;color:#9ca3af;margin-top:6px;">ℹ️ Ces campagnes ont été arrêtées car le coût par contact obtenu était trop élevé. Décision prise en concertation avec l'agence.</p>
+</div>
+
+<!-- RECRUTEMENT -->
+<div class="section">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+    <span style="font-size:18px;">👤</span>
+    <div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#6b7280;margin-bottom:2px;">Campagne terminée</div>
+      <div style="font-size:16px;font-weight:800;color:#1a1a2e;">Recrutement</div>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table class="camp-table">
+      <thead>
+        <tr>
+          <th>Ville</th>
+          <th>Profil recherché</th>
+          <th>Période de diffusion</th>
+          <th>Budget</th>
+          <th>Statut campagne</th>
+          <th>Statut formulaire</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Marseille</td>
+          <td>Commercial · 27-55 ans</td>
+          <td>04/03 → 13/03/26</td>
+          <td>300 €</td>
+          <td><span class="badge b-done">✔️ Terminée</span></td>
+          <td><span class="form-no">— DM (message privé)</span></td>
+        </tr>
+        <tr>
+          <td>Perpignan</td>
+          <td>Commercial · 27-55 ans</td>
+          <td>04/03 → 18/03/26</td>
+          <td>300 €</td>
+          <td><span class="badge b-done">✔️ Terminée</span></td>
+          <td><span class="form-no">— DM (message privé)</span></td>
+        </tr>
+        <tr>
+          <td>Limoges</td>
+          <td>Commercial · 27-55 ans</td>
+          <td>04/03 → 18/03/26</td>
+          <td>300 €</td>
+          <td><span class="badge b-done">✔️ Terminée</span></td>
+          <td><span class="form-no">— DM (message privé)</span></td>
+        </tr>
+        <tr class="budget-row">
+          <td colspan="3">💰 Total Recrutement</td>
+          <td><strong>900 €</strong></td>
+          <td colspan="2"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- KPIs recrutement -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
+
+    <!-- Tunnel de conversion -->
+    <div style="background:white;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,0.07);">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+        <span style="font-size:16px;">🔽</span>
+        <span style="font-size:14px;font-weight:700;color:#1a1a2e;">Tunnel de conversion</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:12px;color:#6b7280;width:100px;">Impressions</span>
+          <div style="flex:1;background:#1a1a2e;border-radius:4px;padding:5px 10px;color:white;font-size:13px;font-weight:700;">202 263</div>
+          <span style="font-size:12px;color:#6b7280;width:40px;text-align:right;">100%</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:12px;color:#6b7280;width:100px;">Clics</span>
+          <div style="width:25%;background:#3b82f6;border-radius:4px;padding:5px 10px;color:white;font-size:13px;font-weight:700;">2 294</div>
+          <span style="font-size:12px;color:#3b82f6;width:40px;text-align:right;">1,13%</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:12px;color:#6b7280;width:100px;">Conversations</span>
+          <div style="width:10%;background:#f97316;border-radius:4px;padding:5px 10px;color:white;font-size:13px;font-weight:700;">19</div>
+          <span style="font-size:12px;color:#f97316;width:40px;text-align:right;">0,83%</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:12px;color:#6b7280;width:100px;">Candidats</span>
+          <div style="width:35%;background:#22c55e;border-radius:4px;padding:5px 10px;color:white;font-size:13px;font-weight:700;">6</div>
+          <span style="font-size:12px;color:#22c55e;width:40px;text-align:right;">31,6%</span>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px;padding-top:14px;border-top:1px solid #f0f0f5;">
+        <div style="text-align:center;">
+          <div style="font-size:11px;color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Coût / conversation</div>
+          <div style="font-size:22px;font-weight:900;color:#1a1a2e;margin-top:4px;">47,03 €</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:11px;color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Coût / candidat</div>
+          <div style="font-size:22px;font-weight:900;color:#1a1a2e;margin-top:4px;">148,93 €</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Résultats par ville -->
+    <div style="background:white;border-radius:12px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,0.07);">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+        <span style="font-size:16px;">📍</span>
+        <span style="font-size:14px;font-weight:700;color:#1a1a2e;">Résultats par ville</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+            <span style="font-size:13px;font-weight:600;">Perpignan</span>
+            <div style="display:flex;gap:12px;">
+              <span style="font-size:13px;color:#6b7280;"><strong>12</strong> conv.</span>
+              <span style="font-size:12px;background:#dbeafe;color:#1d4ed8;padding:2px 8px;border-radius:20px;font-weight:600;">2 candidats</span>
+            </div>
+          </div>
+          <div style="background:#e5e7eb;border-radius:4px;height:6px;"><div style="background:#3b82f6;width:100%;height:6px;border-radius:4px;"></div></div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+            <span style="font-size:13px;font-weight:600;">Limoges</span>
+            <div style="display:flex;gap:12px;">
+              <span style="font-size:13px;color:#6b7280;"><strong>6</strong> conv.</span>
+              <span style="font-size:12px;background:#dcfce7;color:#15803d;padding:2px 8px;border-radius:20px;font-weight:600;">3 candidats</span>
+            </div>
+          </div>
+          <div style="background:#e5e7eb;border-radius:4px;height:6px;"><div style="background:#22c55e;width:50%;height:6px;border-radius:4px;"></div></div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+            <span style="font-size:13px;font-weight:600;">Marseille</span>
+            <div style="display:flex;gap:12px;">
+              <span style="font-size:13px;color:#6b7280;"><strong>1</strong> conv.</span>
+              <span style="font-size:12px;background:#fee2e2;color:#b91c1c;padding:2px 8px;border-radius:20px;font-weight:600;">1 candidat</span>
+            </div>
+          </div>
+          <div style="background:#e5e7eb;border-radius:4px;height:6px;"><div style="background:#ef4444;width:8%;height:6px;border-radius:4px;"></div></div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:14px;padding-top:12px;border-top:1px solid #f0f0f5;font-size:12px;color:#6b7280;">
+        <span>Total conversations : <strong>19</strong></span>
+        <span>Candidats : <strong>6</strong></span>
+      </div>
+      <div style="margin-top:12px;background:#fef3c7;border:1px solid #fbbf24;border-radius:8px;padding:10px 14px;font-size:12px;color:#92400e;">
+        ⚠️ <strong>Marseille sous-performe</strong> — problème de marché local ou de créatif à investiguer
+      </div>
+    </div>
+
+  </div>
+  <p style="font-size:12px;color:#9ca3af;margin-top:12px;">ℹ️ Campagnes terminées. Décision en attente pour d'éventuelles prochaines vagues de recrutement.</p>
+</div>
+
+
+
+<div class="footer">Document réalisé par Novembre communication · Aterno x Novembre · Mars 2026</div>
+
+
+<!-- MODAL PLEIN ECRAN -->
+<div id="modal" onclick="closeModal()" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;cursor:zoom-out;">
+  <img id="modal-img" src="" style="max-width:90%;max-height:90%;border-radius:12px;box-shadow:0 8px 40px rgba(0,0,0,0.5);">
+</div>
+<script>
+function toggleCreasOffre() {
+  var row = document.getElementById('row-creas-offre');
+  var btn = document.getElementById('btn-creas-offre');
+  if (row.style.display === 'none') {
+    row.style.display = 'table-row';
+    btn.textContent = '▼ Masquer les visuels';
+  } else {
+    row.style.display = 'none';
+    btn.textContent = '▶ Voir les visuels';
+  }
+}
+function toggleVisuels(id) {
+  var row = document.getElementById(id);
+  if (!row) return;
+  row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+}
+function toggleCreasSolaire() {
+  var row = document.getElementById('row-creas-solaire');
+  var btn = document.getElementById('btn-creas-sol');
+  if (row.style.display === 'none') {
+    row.style.display = 'table-row';
+    btn.textContent = '▼ Masquer les visuels';
+  } else {
+    row.style.display = 'none';
+    btn.textContent = '▶ Voir les visuels';
+  }
+}
+function toggleCreasRetargeting() {
+  var row = document.getElementById('row-creas-retargeting');
+  var btn = document.getElementById('btn-creas-ret');
+  if (row.style.display === 'none') {
+    row.style.display = 'table-row';
+    btn.textContent = '▼ Masquer les visuels';
+  } else {
+    row.style.display = 'none';
+    btn.textContent = '▶ Voir les visuels';
+  }
+}
+function toggleCreas() {
+  var row = document.getElementById('row-creas-cold');
+  var btn = document.getElementById('btn-creas');
+  if (row.style.display === 'none') {
+    row.style.display = 'table-row';
+    btn.textContent = '▼ Masquer les visuels';
+  } else {
+    row.style.display = 'none';
+    btn.textContent = '▶ Voir les visuels';
+  }
+}
+function openModal(src) {
+  document.getElementById('modal-img').src = src;
+  document.getElementById('modal').style.display = 'flex';
+}
+function closeModal() {
+  document.getElementById('modal').style.display = 'none';
+}
+</script>
+
+</body>
 </html>
